@@ -73,11 +73,13 @@ def evaluate(
         max_depth = float("Inf")
 
     result_path = os.path.expanduser(result_path)
-    dt_annos = kitti.get_label_annos(result_path)
+    label_path = os.path.expanduser(label_path)
+    
+    val_image_ids = _read_imageset_file(label_split_file)
+    dt_annos = kitti.get_label_annos(result_path, val_image_ids)
+    gt_annos = kitti.get_label_annos(label_path, val_image_ids)
     if score_thresh > 0:
         dt_annos = kitti.filter_annos_low_score(dt_annos, score_thresh)
-    val_image_ids = _read_imageset_file(label_split_file)
-    gt_annos = kitti.get_label_annos(label_path, val_image_ids)
 
     if min_depth == max_depth == -1:
         for min_depth, max_depth in DEPTH_EVAL:
