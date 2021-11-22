@@ -378,8 +378,8 @@ def calculate_iou_partly(gt_annos, dt_annos, metric, num_parts=50):
     num_examples = len(gt_annos)
     split_parts = get_split_parts(num_examples, num_parts)
     parted_overlaps = []
+    names = []
     example_idx = 0
-
     for num_part in split_parts:
         gt_annos_part = gt_annos[example_idx : example_idx + num_part]
         dt_annos_part = dt_annos[example_idx : example_idx + num_part]
@@ -410,6 +410,7 @@ def calculate_iou_partly(gt_annos, dt_annos, metric, num_parts=50):
         else:
             raise ValueError("unknown metric")
         parted_overlaps.append(overlap_part)
+        names.extend([a["file_name"][0] for a in dt_annos_part])
         example_idx += num_part
     overlaps = []
     example_idx = 0
@@ -430,7 +431,7 @@ def calculate_iou_partly(gt_annos, dt_annos, metric, num_parts=50):
             dt_num_idx += dt_box_num
         example_idx += num_part
 
-    return overlaps, parted_overlaps, total_gt_num, total_dt_num
+    return overlaps, parted_overlaps, total_gt_num, total_dt_num, names
 
 
 def _prepare_data(
@@ -509,7 +510,7 @@ def eval_class(
     split_parts = get_split_parts(num_examples, num_parts)
 
     rets = calculate_iou_partly(dt_annos, gt_annos, metric, num_parts)
-    overlaps, parted_overlaps, total_dt_num, total_gt_num = rets
+    overlaps, parted_overlaps, total_dt_num, total_gt_num, names = rets
     N_SAMPLE_PTS = 41
     num_minoverlap = len(min_overlaps)
     num_class = len(current_classes)
@@ -577,6 +578,7 @@ def eval_class(
                         thresholds=thresholds,
                         compute_aos=compute_aos,
                     )
+                    # print(f'file {names[j]}, res: {pr}')
                     idx += num_part
                 for i in range(len(thresholds)):
                     recall[m, l, k, i] = pr[i, 0] / (pr[i, 0] + pr[i, 2])
@@ -772,6 +774,7 @@ def get_official_eval_result(
             if anno["alpha"][0] != -10:
                 compute_aos = True
             break
+
     (
         mAPbbox,
         mAPbev,
@@ -804,23 +807,23 @@ def get_official_eval_result(
             )
             result += print_str(
                 (
-                    f"bbox AP:{mAPbbox[j, 0, i]:.4f}, "
-                    f"{mAPbbox[j, 1, i]:.4f}, "
-                    f"{mAPbbox[j, 2, i]:.4f}"
+                    f"bbox AP:{mAPbbox[j, 0, i]:.2f}, "
+                    f"{mAPbbox[j, 1, i]:.2f}, "
+                    f"{mAPbbox[j, 2, i]:.2f}"
                 )
             )
             result += print_str(
                 (
-                    f"bev  AP:{mAPbev[j, 0, i]:.4f}, "
-                    f"{mAPbev[j, 1, i]:.4f}, "
-                    f"{mAPbev[j, 2, i]:.4f}"
+                    f"bev  AP:{mAPbev[j, 0, i]:.2f}, "
+                    f"{mAPbev[j, 1, i]:.2f}, "
+                    f"{mAPbev[j, 2, i]:.2f}"
                 )
             )
             result += print_str(
                 (
-                    f"3d   AP:{mAP3d[j, 0, i]:.4f}, "
-                    f"{mAP3d[j, 1, i]:.4f}, "
-                    f"{mAP3d[j, 2, i]:.4f}"
+                    f"3d   AP:{mAP3d[j, 0, i]:.2f}, "
+                    f"{mAP3d[j, 1, i]:.2f}, "
+                    f"{mAP3d[j, 2, i]:.2f}"
                 )
             )
 
@@ -845,23 +848,23 @@ def get_official_eval_result(
             )
             result += print_str(
                 (
-                    f"bbox AP:{mAPbbox_R40[j, 0, i]:.4f}, "
-                    f"{mAPbbox_R40[j, 1, i]:.4f}, "
-                    f"{mAPbbox_R40[j, 2, i]:.4f}"
+                    f"bbox AP:{mAPbbox_R40[j, 0, i]:.2f}, "
+                    f"{mAPbbox_R40[j, 1, i]:.2f}, "
+                    f"{mAPbbox_R40[j, 2, i]:.2f}"
                 )
             )
             result += print_str(
                 (
-                    f"bev  AP:{mAPbev_R40[j, 0, i]:.4f}, "
-                    f"{mAPbev_R40[j, 1, i]:.4f}, "
-                    f"{mAPbev_R40[j, 2, i]:.4f}"
+                    f"bev  AP:{mAPbev_R40[j, 0, i]:.2f}, "
+                    f"{mAPbev_R40[j, 1, i]:.2f}, "
+                    f"{mAPbev_R40[j, 2, i]:.2f}"
                 )
             )
             result += print_str(
                 (
-                    f"3d   AP:{mAP3d_R40[j, 0, i]:.4f}, "
-                    f"{mAP3d_R40[j, 1, i]:.4f}, "
-                    f"{mAP3d_R40[j, 2, i]:.4f}"
+                    f"3d   AP:{mAP3d_R40[j, 0, i]:.2f}, "
+                    f"{mAP3d_R40[j, 1, i]:.2f}, "
+                    f"{mAP3d_R40[j, 2, i]:.2f}"
                 )
             )
             if compute_aos:

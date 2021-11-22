@@ -48,6 +48,7 @@ def evaluate_once(
         f"results_class_{current_class}_{min_depth}_{max_depth}" + suffix + ".txt",
     )
     print("-" * 100)
+    print(f'Min depth: {min_depth}, Max depth: {max_depth}')
     print(ress)
     with open(out_name, "w") as f:
         f.write(ress)

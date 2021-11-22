@@ -308,6 +308,7 @@ def get_label_anno(label_path):
     #     content = []
     # else:
     content = [line.strip().split(' ') for line in lines]
+    annotations['file_name'] = np.array([str(label_path).split('/')[-1]])
     annotations['name'] = np.array([x[0] for x in content])
     annotations['truncated'] = np.array([float(x[1]) for x in content])
     annotations['occluded'] = np.array([int(x[2]) for x in content])
